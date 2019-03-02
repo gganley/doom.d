@@ -6,3 +6,4 @@
       ns-alternate-modifier 'super
       mac-control-modifier 'control
       ns-function-modifier 'hyper)
+(setq-default evil-escape-key-sequence "fd")
