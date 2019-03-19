@@ -69,3 +69,9 @@
   (start-process-shell-command "" nil "toggl" "-d" (read-string "Decription: ") "-p" (read-string "Project: ") "-t" (read-string "Tags: ")))
 
 (add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'(lambda (key-list) (interactive (list (read-key-sequence \"Key combination: \"))) (format \"%s\" (key-description key-list)))) .. %?\n"))
+
+(setq evil-escape-key-sequence "fd")
+
+(setq lsp-ui-doc-max-height 32
+      lsp-ui-doc-use-webkit t
+      lsp-ui-flycheck-enable t)
