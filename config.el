@@ -38,7 +38,7 @@
         (search category-keep))
       org-default-notes-file "/home/gganley/org/notes.org"
       org-directory "~/org/"
-      org-outline-path-complete-in-steps t
+      org-outline-path-complete-in-steps nil
       org-refile-use-outline-path t
       org-refile-allow-creating-parent-nodes 'confirm
       org-refile-targets
@@ -53,3 +53,13 @@
 (after! org
   (let ((gg/get-keyboard-seq (lambda )))
    (add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'gg/get-keyboard-seq) .. %?\n"))))
+
+(map! :leader
+      (:prefix ("a" . "gganley")
+        (:prefix ("p" . "paren")
+          :desc "Wrap round" "(" #'sp-wrap-round
+          :desc "Slurp" "s" #'sp-slurp-hybrid-sexp)
+        (:prefix ("g" . "go")
+          :desc "to current timer" "T" #'org-clock-goto)
+        :desc "Clock in" "i" #'org-clock-in
+        :desc "Clock out" "o" #'org-clock-out))
