@@ -45,7 +45,9 @@
       '((nil :maxlevel . 3)
         (org-agenda-files :maxlevel . 3)
         ("~/org/consume_later.org" :level . 1))
+      org-clock-persist 'history
       org-agenda-todo-ignore-scheduled 'future)
+(org-clock-persistence-insinuate)
 
 (defun gg/get-keyboard-seq (key-list)
                                (interactive (list (read-key-sequence "Key combination: ")))
