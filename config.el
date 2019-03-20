@@ -18,7 +18,9 @@
 (setq evil-escape-key-sequence "fd")
 
 ;; LSP
-(setq lsp-ui-doc-max-height 32
+(setq lsp-ui-doc-include-signature t
+      lsp-ui-doc-max-height 32
+      lsp-ui-doc-max-width 35
       lsp-ui-doc-use-webkit t
       lsp-ui-flycheck-enable t)
 
