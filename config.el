@@ -45,5 +45,9 @@
         ("~/org/consume_later.org" :level . 1))
       org-agenda-todo-ignore-scheduled 'future)
 
+(defun gg/get-keyboard-seq (key-list)
+                               (interactive (list (read-key-sequence "Key combination: ")))
+                               (format "%s" (key-description key-list)))
 (after! org
-   (add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'(lambda (key-list) (interactive (list (read-key-sequence \"Key combination: \"))) (format \"%s\" (key-description key-list)))) .. %?\n")))
+  (let ((gg/get-keyboard-seq (lambda )))
+   (add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'gg/get-keyboard-seq) .. %?\n")))
