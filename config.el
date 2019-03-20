@@ -1,77 +1,49 @@
 ;;; ~/.doom.d/config.el -*- lexical-binding: t; -*-
 
 ;; Place your private configuration here
+(setq user-full-name "Gregory Ganley"
+      user-mail-address "gganley@student.bridgew.edu"
 
-(setq mac-command-modifier 'meta
-      ns-alternate-modifier 'super
-      mac-control-modifier 'control
-      ns-function-modifier 'hyper
-      org-agenda-todo-ignore-scheduled 'future)
-(setq doom-font (font-spec :family "Fira Mono" :size 12))
-(setq-default evil-escape-key-sequence "fd")
-;; Stolen from https://emacs.stackexchange.com/questions/24698/ansi-escape-sequences-in-compilation-mode
-;; Stolen from (http://endlessparentheses.com/ansi-colors-in-the-compilation-buffer-output.html)
-(require 'ansi-color)
-(defun endless/colorize-compilation ()
-  "Colorize from `compilation-filter-start' to `point'."
-  (let ((inhibit-read-only t))
-    (ansi-color-apply-on-region
-     compilation-filter-start (point))))
+      doom-font (font-spec :family "Fira Mono" :size 12)
+      doom-big-font (font-spec :family "Fira Mono" :size 19))
 
-(add-hook 'compilation-filter-hook
-          #'endless/colorize-compilation)
-;; Stolen from (https://oleksandrmanzyuk.wordpress.com/2011/11/05/better-emacs-shell-part-i/)
-(defun regexp-alternatives (regexps)
-  "Return the alternation of a list of regexps."
-  (mapconcat (lambda (regexp)
-               (concat "\\(?:" regexp "\\)"))
-             regexps "\\|"))
+(when IS-MAC
+  (setq mac-command-modifier 'meta
+        ns-alternate-modifier 'super
+        mac-control-modifier 'control
+        ns-function-modifier 'hyper
+        ns-use-thin-smoothing t))
 
-(defvar non-sgr-control-sequence-regexp nil
-  "Regexp that matches non-SGR control sequences.")
-
-(setq non-sgr-control-sequence-regexp
-      (regexp-alternatives
-       '(;; icon name escape sequences
-         "\033\\][0-2];.*?\007"
-         ;; non-SGR CSI escape sequences
-         "\033\\[\\??[0-9;]*[^0-9;m]"
-         ;; noop
-         "\012\033\\[2K\033\\[1F"
-         )))
-
-(defun filter-non-sgr-control-sequences-in-region (begin end)
-  (save-excursion
-    (goto-char begin)
-    (while (re-search-forward
-            non-sgr-control-sequence-regexp end t)
-      (replace-match ""))))
-
-(defun filter-non-sgr-control-sequences-in-output (ignored)
-  (let ((start-marker
-         (or comint-last-output-start
-             (point-min-marker)))
-        (end-marker
-         (process-mark
-          (get-buffer-process (current-buffer)))))
-    (filter-non-sgr-control-sequences-in-region
-     start-marker
-     end-marker)))
-
-(add-hook 'comint-output-filter-functions
-          'filter-non-sgr-control-sequences-in-output)
-
-(setq org-outline-path-complete-in-steps nil
-      org-refile-use-outline-path t)
-
-(defun toggl ()
-  (interactive)
-  (start-process-shell-command "" nil "toggl" "-d" (read-string "Decription: ") "-p" (read-string "Project: ") "-t" (read-string "Tags: ")))
-
-(add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'(lambda (key-list) (interactive (list (read-key-sequence \"Key combination: \"))) (format \"%s\" (key-description key-list)))) .. %?\n"))
-
+;; Evil
 (setq evil-escape-key-sequence "fd")
 
+;; LSP
 (setq lsp-ui-doc-max-height 32
       lsp-ui-doc-use-webkit t
       lsp-ui-flycheck-enable t)
+
+;; Org
+(setq org-agenda-files '("~/org/projects.org" "~/org/inbox.org" "~/org/todo.org")
+      org-agenda-prefix-format
+      '((agenda . " %i %b %-12:c%?-12t% s")
+        (todo . " %i %-25:b")
+        (tags . " %i %-12:c")
+        (search . " %i %-12:c"))
+      org-agenda-sorting-strategy
+      '((agenda habit-down time-up priority-down category-keep)
+        (todo priority-down category-keep)
+        (tags priority-down category-keep)
+        (search category-keep))
+      org-default-notes-file "/home/gganley/org/notes.org"
+      org-directory "~/org/"
+      org-outline-path-complete-in-steps t
+      org-refile-use-outline-path t
+      org-refile-allow-creating-parent-nodes 'confirm
+      org-refile-targets
+      '((nil :maxlevel . 3)
+        (org-agenda-files :maxlevel . 3)
+        ("~/org/consume_later.org" :level . 1))
+      org-agenda-todo-ignore-scheduled 'future)
+
+(after! org
+   (add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'(lambda (key-list) (interactive (list (read-key-sequence \"Key combination: \"))) (format \"%s\" (key-description key-list)))) .. %?\n")))
