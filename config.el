@@ -50,6 +50,11 @@
 (defun gg/get-keyboard-seq (key-list)
                                (interactive (list (read-key-sequence "Key combination: ")))
                                (format "%s" (key-description key-list)))
+(after! org-agenda
+    (add-to-list 'org-agenda-custom-commands '("w" "work todos"
+                                               ((tags-todo "-personal"))))
+    (add-to-list 'org-agenda-custom-commands '("p" "personal project todos"
+                                               ((tags "personal")))))
 (after! org
   (let ((gg/get-keyboard-seq (lambda )))
    (add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'gg/get-keyboard-seq) .. %?\n"))))
