@@ -51,8 +51,7 @@
                                (interactive (list (read-key-sequence "Key combination: ")))
                                (format "%s" (key-description key-list)))
 (after! org
-  (let ((gg/get-keyboard-seq (lambda )))
-   (add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'gg/get-keyboard-seq) .. %?\n"))))
+  (add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'gg/get-keyboard-seq) .. %?\n")))
 
 (map! :leader
       (:prefix ("a" . "gganley")
