@@ -24,8 +24,11 @@
       lsp-ui-doc-use-webkit t
       lsp-ui-flycheck-enable t)
 
+(setq org-agenda-dim-blocked-tasks 't)
+(setq org-enforce-todo-dependencies 't)
 ;; Org
 (setq org-agenda-files '("~/org/projects.org" "~/org/inbox.org" "~/org/todo.org")
+      org-clock-idle-time 10
       org-agenda-prefix-format
       '((agenda . " %i %b %-12:c%?-12t% s")
         (todo . " %i %-25:b")
@@ -39,6 +42,7 @@
       org-default-notes-file "/home/gganley/org/notes.org"
       org-directory "~/org/"
       org-outline-path-complete-in-steps nil
+      org-clock-mode-line-total 'current
       org-refile-use-outline-path t
       org-refile-allow-creating-parent-nodes 'confirm
       org-refile-targets
