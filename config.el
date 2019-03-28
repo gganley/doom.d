@@ -19,13 +19,13 @@
 
 ;; LSP
 (setq lsp-ui-doc-include-signature t
-      lsp-ui-doc-max-height 32
-      lsp-ui-doc-max-width 35
-      lsp-ui-doc-use-webkit t
+      lsp-ui-doc-max-height 25
+      lsp-ui-doc-max-width 50
+      lsp-ui-doc-use-webkit nil
       lsp-ui-flycheck-enable t)
 
 ;; Org
-(setq org-agenda-files '("~/org/projects.org" "~/org/inbox.org" "~/org/todo.org")
+(setq org-agenda-files '("~/org/projects.org" "~/org/inbox.org" "~/org/todo.org" "~/org/personal.org")
       org-agenda-prefix-format
       '((agenda . " %i %b %-12:c%?-12t% s")
         (todo . " %i %-25:b")
@@ -56,7 +56,7 @@
     (add-to-list 'org-agenda-custom-commands '("w" "work todos"
                                                ((tags-todo "-personal"))))
     (add-to-list 'org-agenda-custom-commands '("p" "personal project todos"
-                                               ((tags "personal")))))
+                                               ((tags-todo "personal")))))
 (after! org
   (add-to-list 'org-capture-templates '("k" "Keybinding" entry (file+headline "~/org/keybindings.org" "Keybinding") "** %(call-interactively #'gg/get-keyboard-seq) .. %?\n")))
 ;; Doom Emacs
@@ -73,4 +73,6 @@
 
 ;; Python
 
-(setq python-shell-interpreter "python3")
+(setq python-shell-interpreter "python3"
+      flycheck-python-flake8-executable "python3"
+      flycheck-python-pycompile-executable "python3")
