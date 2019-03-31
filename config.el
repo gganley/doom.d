@@ -30,10 +30,10 @@
 (setq org-agenda-files '("~/org/projects.org" "~/org/inbox.org" "~/org/todo.org")
       org-clock-idle-time 10
       org-agenda-prefix-format
-      '((agenda . " %i %b %-12:c%?-12t% s")
-        (todo . " %i %-25:b")
-        (tags . " %i %-12:c")
-        (search . " %i %-12:c"))
+      '((agenda . "%s")
+        (todo . "%-40b %s")
+        (tags . "%:c %s")
+        (search . "%c %s"))
       org-agenda-sorting-strategy
       '((agenda habit-down time-up priority-down category-keep)
         (todo priority-down category-keep)
