@@ -28,7 +28,7 @@
 (setq org-agenda-dim-blocked-tasks 't)
 (setq org-enforce-todo-dependencies 't)
 ;; Org
-(setq org-agenda-files '("~/org/projects.org" "~/org/inbox.org" "~/org/todo.org" "~/org/personal.org")
+(setq org-agenda-files '("~/org/timely.org" "~/org/projects.org" "~/org/inbox.org" "~/org/todo.org" "~/org/personal.org")
       org-agenda-prefix-format
       '((agenda . "%s")
         (todo . "%-40b %s")
