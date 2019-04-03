@@ -98,6 +98,8 @@
         :desc "Clock in" "i" #'org-clock-in
         :desc "Clock out" "o" #'org-clock-out))
 
+(setq doom-theme 'doom-dracula)
+
 ;; Python
 
 (setq python-shell-interpreter "python3"
