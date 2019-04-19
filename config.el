@@ -55,7 +55,7 @@
 
 (defun gg/get-keyboard-seq (key-list)
                                (interactive (list (read-key-sequence "Key combination: ")))
-                               (format "%s" (key-description key-list)))
+                               (format "%s .. %s" (key-description key-list) (key-binding key-list)))
 (after! org-agenda
     (add-to-list 'org-agenda-custom-commands '("w" "work todos"
                                                ((tags-todo "-personal"))))
@@ -86,7 +86,7 @@
          "* TODO %?\n%i\n%a" :prepend t :kill-buffer t)
         ("k" "Keybinding" entry
          (file+headline "~/org/keybindings.org" "Keybinding")
-         "** %(call-interactively #'gg/get-keyboard-seq) .. %?\n"))))
+         "** %(call-interactively #'gg/get-keyboard-seq)\n  %?\n"))))
 ;; Doom Emacs
 
 (map! :leader
