@@ -32,12 +32,12 @@
        (popup            ; tame sudden yet inevitable temporary windows
         +all             ; catch all popups that start with an asterix
         +defaults)       ; default popup rules
-       pretty-code       ; replace bits of code with pretty symbols
+       ;; pretty-code       ; replace bits of code with pretty symbols
        ;;tabbar            ; FIXME an (incomplete) tab bar for Emacs
        ;; unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
        vi-tilde-fringe   ; fringe tildes to mark beyond EOB
-       ;; window-select     ; visually switch windows
+       window-select     ; visually switch windows
 
        :editor
        fold              ; (nigh) universal code folding
@@ -53,7 +53,7 @@
        +icons          ; colorful icons for dired-mode
         )
        electric          ; smarter, keyword-based electric-indent
-       ;; eshell            ; a consistent, cross-platform shell (WIP)
+       ;;eshell            ; a consistent, cross-platform shell (WIP)
        imenu             ; an imenu sidebar and searchable code index
        term              ; terminals in Emacs
        vc                ; version-control and Emacs, sitting in a tree
@@ -136,7 +136,7 @@
        ;; should be loaded late.
        :app
        ;;(email +gmail)    ; emacs as an email client
-       ;; irc               ; how neckbeards socialize
+       irc               ; how neckbeards socialize
        ;;(rss +org)        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
        ;;(write            ; emacs as a word processor (latex + org + markdown)

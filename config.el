@@ -5,6 +5,7 @@
       user-mail-address "gganley@student.bridgew.edu"
 
       doom-font (font-spec :family "Fira Mono" :size 12)
+      doom-theme 'doom-dracula
       doom-big-font (font-spec :family "Fira Mono" :size 19))
 
 (when IS-MAC
@@ -91,15 +92,16 @@
 
 (map! :leader
       (:prefix ("a" . "gganley")
-        (:prefix ("p" . "paren")
-          :desc "Wrap round" "(" #'sp-wrap-round
-          :desc "Slurp" "s" #'sp-slurp-hybrid-sexp)
+        :desc "Wrap round" "w" #'sp-wrap-round
+        :desc "Raise" "r" #'sp-raise-sexp
+        :desc "Slurp" "s" #'sp-slurp-hybrid-sexp
         (:prefix ("g" . "go")
           :desc "to current timer" "T" #'org-clock-goto)
         :desc "Clock in" "i" #'org-clock-in
         :desc "Clock out" "o" #'org-clock-out))
 
-(setq doom-theme 'doom-dracula)
+(setq doom-modeline-persp-name t
+      doom-modeline-irc t)
 
 ;;; Doom Modeline
 
