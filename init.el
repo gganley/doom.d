@@ -1,51 +1,46 @@
 ;;; init.el -*- lexical-binding: t; -*-
 ;; Copy me to ~/.doom.d/init.el or ~/.config/doom/init.el, then edit me!
 
-(doom! :feature
-       ;;debugger
-       ;; eval
-       (evil +everywhere)
-       ;; file-templates
-       (lookup
-        +docsets)
-       snippets
-       workspaces
-
-       :completion
-       company
-       ;;helm
-       ;;ido
-       ivy
+(doom! :completion
+       company           ; the ultimate code completion backend
+       ;;helm              ; the *other* search engine for love and life
+       ;;ido               ; the other *other* search engine...
+       ivy               ; a search engine for love and life
 
        :ui
        ;; deft
        doom
        doom-dashboard
-       modeline
-       ;; doom-quit
-       evil-goggles
-       ;;fci
+       ;;doom-quit
+       fill-column
        hl-todo           ; highlight TODO/FIXME/NOTE tags
-       ;; nav-flash         ; blink the current line after jumping
+       indent-guides
+       modeline
+       nav-flash         ; blink the current line after jumping
        ;;neotree           ; a project drawer, like NERDTree for vim
-       ;; treemacs          ; a project drawer, like neotree but cooler
+       ophints           ; highlight the region an operation acts on
        (popup            ; tame sudden yet inevitable temporary windows
         +all             ; catch all popups that start with an asterix
         +defaults)       ; default popup rules
        ;; pretty-code       ; replace bits of code with pretty symbols
        ;;tabbar            ; FIXME an (incomplete) tab bar for Emacs
+       treemacs          ; a project drawer, like neotree but cooler
        ;; unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
        vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        window-select     ; visually switch windows
+       workspaces        ; tab emulation, persistence & separate workspaces
 
        :editor
+       (evil +everywhere); come to the dark side, we have cookies
+       file-templates    ; auto-snippets for empty files
        fold              ; (nigh) universal code folding
        (format +onsave)  ; automated prettiness
        ;;lispy             ; vim for lisp, for people who dont like vim
-       ;; multiple-cursors  ; editing in many places at once
+       multiple-cursors  ; editing in many places at once
        ;;parinfer          ; turn lisp into python, sort of
-       ;; rotate-text       ; cycle region at point between text candidates
+       rotate-text       ; cycle region at point between text candidates
+       snippets          ; my elves. They type so I don't have to
 
        :emacs
        (dired            ; making dired pretty [functional]
@@ -60,18 +55,23 @@
 
        :tools
        ;;ansible
+       ;;debugger          ; FIXME stepping through code, to help you add bugs
+       ;;direnv
        docker
        editorconfig      ; let someone else argue about tabs vs spaces
        ;;ein               ; tame Jupyter notebooks with emacs
+       eval              ; run code, run (also, repls)
        flycheck          ; tasing you for every semicolon you forget
        flyspell          ; tasing you for misspelling mispelling
        ;;gist              ; interacting with github gists
+       (lookup
+        +docsets)
        lsp
        ;;macos             ; MacOS-specific commands
        magit             ; a git porcelain for Emacs
-       ;; make              ; run make tasks from Emacs
+       make              ; run make tasks from Emacs
        ;;password-store    ; password manager for nerds
-       ;; pdf               ; pdf enhancements
+       pdf               ; pdf enhancements
        ;;prodigy           ; FIXME managing external services & code builders
        ;;rgb               ; creating color strings
        ;;terraform         ; infrastructure as code
@@ -81,39 +81,43 @@
        ;;vterm             ; another terminals in Emacs
 
        :lang
+       ;;agda              ; types of types of types of types...
        ;;assembly          ; assembly for fun or debugging
-       ;; (cc +irony +rtags); C/C++/Obj-C madness
+       (cc +irony +rtags); C/C++/Obj-C madness
        ;; clojure           ; java with a lisp
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
        ;;coq               ; proofs-as-programs
        ;;crystal           ; ruby at the speed of c
        ;;csharp            ; unity, .NET, and mono shenanigans
-       ;; data              ; config/data formats
+       data              ; config/data formats
        ;;erlang            ; an elegant language for a more civilized age
        ;;elixir            ; erlang done right
        ;;elm               ; care for a cup of TEA?
        emacs-lisp        ; drown in parentheses
        ;; ess               ; emacs speaks statistics
-       ;; go                ; the hipster dialect
+       (go +lsp)                ; the hipster dialect
        ;; (haskell +intero) ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ;
        ;;(java +meghanada) ; the poster child for carpal tunnel syndrome
        javascript        ; all(hope(abandon(ye(who(enter(here))))))
        ;;julia             ; a better, faster MATLAB
-       ;; latex             ; writing papers in Emacs has never been so fun
+       ;;kotlin
+       latex             ; writing papers in Emacs has never been so fun
        ;; ledger            ; an accounting system in Emacs
        ;;lua               ; one-based indices? one-based indices
-       ;; markdown          ; writing docs for people to ignore
+       markdown          ; writing docs for people to ignore
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
-       ;; (org              ; organize your plain life in plain text
-       ;;  +attach          ; custom attachment system
-       ;;  +babel           ; running code in org
-       ;;  +capture         ; org-capture in and outside of Emacs
-       ;;  +export          ; Exporting org to whatever you want
-       ;;  +present)        ; Emacs for presentations
+       (org              ; organize your plain life in plain text
+        +attach          ; custom attachment system
+        +babel           ; running code in org
+        +capture         ; org-capture in and outside of Emacs
+        +export          ; Exporting org to whatever you want
+        +habit           ; Keep track of your habits
+        +present        ; Emacs for presentations
+        +protocol)       ; Support for org-protocol:// links
        ;;perl              ; write code no one else can comprehend
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
@@ -123,11 +127,12 @@
        ;;racket            ; a DSL for DSLs
        ;; rest              ; Emacs as a REST client
        ;;ruby              ; 1.step do {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-       ;; (rust +lsp)              ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       (rust +lsp)              ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        ;;scala             ; java, but good
-       ;; (sh)        ; she sells (ba|z|fi)sh shells on the C xor
+       sh        ; she sells (ba|z|fi)sh shells on the C xor
        ;;solidity          ; do you need a blockchain? No.
        ;;swift             ; who asked for emoji variables?
+       ;;terra             ; Earth and Moon in alignment for performance.
        ;; web               ; the tubes
        ;;vala              ; GObjective-C
 

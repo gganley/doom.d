@@ -4,9 +4,9 @@
 (setq user-full-name "Gregory Ganley"
       user-mail-address "gganley@student.bridgew.edu"
 
-      doom-font (font-spec :family "Fira Mono" :size 12)
+      doom-font (font-spec :family "Monaco" :size 9)
       doom-theme 'doom-dracula
-      doom-big-font (font-spec :family "Fira Mono" :size 19))
+      doom-big-font (font-spec :family "Fira Mono" :size 15))
 
 (when IS-MAC
   (setq mac-command-modifier 'meta
