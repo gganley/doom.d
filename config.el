@@ -28,7 +28,8 @@
 (setq org-agenda-dim-blocked-tasks 't)
 (setq org-enforce-todo-dependencies 't)
 ;; Org
-(setq org-agenda-files '("~/org/timely.org" "~/org/projects.org" "~/org/inbox.org" "~/org/todo.org" "~/org/personal.org")
+(setq org-agenda-files '("~/org/projects.org" "~/org/inbox.org" "~/org/todo.org" "~/org/personal.org")
+      evil-org-special-o/O '(table-row item)
       org-agenda-prefix-format
       '((agenda . "%s")
         (todo . "%-40b %s")
@@ -102,8 +103,35 @@
 (setq doom-modeline-persp-name t
       doom-modeline-irc t)
 
+;;; Doom Modeline
+
+(setq doom-modeline-major-mode-icon t
+      doom-modeline-persp-name t
+      doom-modeline-github t)
+
+;; (doom-modeline-def-modeline 'toggl
+;;   '(bar matches " " buffer-info)
+;;   '(media-info major-mode))
+
+; (doom-modeline-def-segment toggl
+;  "Toggl segment"
+;  "test")
+
+;(doom-modeline-def-modeline 'my-main
+;  '(bar workspace-name window-number modals matches buffer-info remote-host buffer-position parrot selection-info)
+;  '(toggl objed-state misc-info persp-name lsp irc mu4e github debug fancy-battery minor-modes input-method buffer-encoding major-mode process vcs checker))
+
+;(defun setup-custom-doom-modeline ()
+;  (doom-modeline-set-modeline 'my-main 'default))
+
+;(add-hook 'doom-modeline-mode-hook 'setup-custom-doom-modeline)
 ;; Python
 
 (setq python-shell-interpreter "python3"
       flycheck-python-flake8-executable "python3"
       flycheck-python-pycompile-executable "python3")
+(map!
+      (:map python-mode-map
+        :localleader
+        (:prefix "a"
+          :desc "Docker compose up build" "t" (lambda! (docker-compose-up "" "--build")))))
