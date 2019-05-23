@@ -95,4 +95,3 @@
 (defun break-apart-float (i)
   (let ((trunked (truncate i)))
     (cons trunked (truncate (* 60 (- i trunked))))))
-
