@@ -5,7 +5,7 @@
       user-mail-address "gganley@student.bridgew.edu"
 
       doom-font (font-spec :family "Monaco" :size 9)
-      doom-theme 'doom-dracula
+      doom-theme 'doom-one
       doom-big-font (font-spec :family "Fira Mono" :size 15))
 
 (when IS-MAC
@@ -90,41 +90,37 @@
          "** %(call-interactively #'gg/get-keyboard-seq)\n  %?\n"))))
 ;; Doom Emacs
 
-(map! :leader
-      (:prefix ("a" . "gganley")
-        :desc "Wrap round" "w" #'sp-wrap-round
-        :desc "Raise" "r" #'sp-raise-sexp
-        :desc "Slurp" "s" #'sp-slurp-hybrid-sexp
-        (:prefix ("g" . "go")
-          :desc "to current timer" "T" #'org-clock-goto)
-        :desc "Clock in" "i" #'org-clock-in
-        :desc "Clock out" "o" #'org-clock-out))
+(setq +workspaces-on-switch-project-behavior t)
 
-(setq doom-modeline-persp-name t
-      doom-modeline-irc t)
+(after! hl-fill-column
+  (set-face-background 'hl-fill-column-face "#555555"))
 
 ;;; Doom Modeline
 
 (setq doom-modeline-major-mode-icon t
+      doom-modeline-irc t
       doom-modeline-persp-name t
       doom-modeline-github t)
 
-;; (doom-modeline-def-modeline 'toggl
-;;   '(bar matches " " buffer-info)
-;;   '(media-info major-mode))
+(after! doom-modeline
+  (doom-modeline-def-segment toggl-segment
+    "Toggl segment"
+    (if (and doom-modeline-toggl
+             (doom-modeline--active))
+        doom-modeline--toggl-format))
+  (doom-modeline-def-segment workspace-list
+    "The M-S-t command but permenent"
+    (+workspace--tabline))
 
-; (doom-modeline-def-segment toggl
-;  "Toggl segment"
-;  "test")
+  (doom-modeline-def-modeline 'my-main
+    '(bar window-number buffer-info remote-host buffer-position selection-info)
+    '(toggl-segment objed-state misc-info persp-name lsp irc mu4e github debug process vcs checker))
 
-;(doom-modeline-def-modeline 'my-main
-;  '(bar workspace-name window-number modals matches buffer-info remote-host buffer-position parrot selection-info)
-;  '(toggl objed-state misc-info persp-name lsp irc mu4e github debug fancy-battery minor-modes input-method buffer-encoding major-mode process vcs checker))
+  (defun setup-custom-doom-modeline ()
+    (doom-modeline-set-modeline 'my-main 'default))
 
-;(defun setup-custom-doom-modeline ()
-;  (doom-modeline-set-modeline 'my-main 'default))
+  (add-hook 'doom-modeline-mode-hook 'setup-custom-doom-modeline))
 
-;(add-hook 'doom-modeline-mode-hook 'setup-custom-doom-modeline)
 ;; Python
 
 (setq python-shell-interpreter "python3"

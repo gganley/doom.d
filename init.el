@@ -28,7 +28,7 @@
        ;; unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
        vi-tilde-fringe   ; fringe tildes to mark beyond EOB
-       window-select     ; visually switch windows
+       (window-select +numbers)     ; visually switch windows
        workspaces        ; tab emulation, persistence & separate workspaces
 
        :editor
@@ -49,8 +49,7 @@
         )
        electric          ; smarter, keyword-based electric-indent
        ;;eshell            ; a consistent, cross-platform shell (WIP)
-       imenu             ; an imenu sidebar and searchable code index
-       term              ; terminals in Emacs
+       ;; imenu             ; an imenu sidebar and searchable code index
        vc                ; version-control and Emacs, sitting in a tree
 
        :tools
@@ -80,11 +79,14 @@
        ;;wakatime
        ;;vterm             ; another terminals in Emacs
 
+       :term
+       term
+
        :lang
        ;;agda              ; types of types of types of types...
        ;;assembly          ; assembly for fun or debugging
        (cc +irony +rtags); C/C++/Obj-C madness
-       ;; clojure           ; java with a lisp
+       clojure           ; java with a lisp
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
        ;;coq               ; proofs-as-programs
        ;;crystal           ; ruby at the speed of c
@@ -118,7 +120,7 @@
         +habit           ; Keep track of your habits
         +present        ; Emacs for presentations
         +protocol)       ; Support for org-protocol:// links
-       ;;perl              ; write code no one else can comprehend
+       perl              ; write code no one else can comprehend
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
@@ -136,13 +138,18 @@
        ;; web               ; the tubes
        ;;vala              ; GObjective-C
 
+       :email
+       ;;(mu4e +gmail)       ; WIP
+       ;;notmuch             ; WIP
+       ;;(wanderlust +gmail) ; WIP
+
        ;; Applications are complex and opinionated modules that transform Emacs
        ;; toward a specific purpose. They may have additional dependencies and
        ;; should be loaded late.
        :app
-       ;;(email +gmail)    ; emacs as an email client
-       irc               ; how neckbeards socialize
-       ;;(rss +org)        ; emacs as an RSS reader
+       calendar
+       irc              ; how neckbeards socialize
+       (rss +org)        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
        ;;(write            ; emacs as a word processor (latex + org + markdown)
        ;; +wordnut         ; wordnet (wn) search
