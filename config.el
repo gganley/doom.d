@@ -2,7 +2,7 @@
 
 ;; Place your private configuration here
 (setq user-full-name "Gregory Ganley"
-      user-mail-address "gganley@student.bridgew.edu"
+      user-mail-address "gcganley2854@gmail.com"
 
       doom-font (font-spec :family "Monaco" :size 9)
       doom-theme 'doom-one
@@ -20,9 +20,8 @@
 
 ;; LSP
 (setq lsp-ui-doc-include-signature t
-      lsp-ui-doc-max-height 25
-      lsp-ui-doc-max-width 50
-      lsp-ui-doc-use-webkit nil
+      lsp-ui-doc-max-height 100
+      lsp-ui-doc-max-width 150
       lsp-ui-flycheck-enable t)
 
 (setq org-agenda-dim-blocked-tasks 't)
@@ -102,24 +101,6 @@
       doom-modeline-persp-name t
       doom-modeline-github t)
 
-(after! doom-modeline
-  (doom-modeline-def-segment toggl-segment
-    "Toggl segment"
-    (if (and doom-modeline-toggl
-             (doom-modeline--active))
-        doom-modeline--toggl-format))
-  (doom-modeline-def-segment workspace-list
-    "The M-S-t command but permenent"
-    (+workspace--tabline))
-
-  (doom-modeline-def-modeline 'my-main
-    '(bar window-number buffer-info remote-host buffer-position selection-info)
-    '(toggl-segment objed-state misc-info persp-name lsp irc mu4e github debug process vcs checker))
-
-  (defun setup-custom-doom-modeline ()
-    (doom-modeline-set-modeline 'my-main 'default))
-
-  (add-hook 'doom-modeline-mode-hook 'setup-custom-doom-modeline))
 
 ;; Python
 
