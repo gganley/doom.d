@@ -36,6 +36,11 @@
       org-default-notes-file (expand-file-name "notes.org" org-directory)
       +org-capture-notes-file (expand-file-name "notes.org" org-directory)
       +org-capture-journal-file (expand-file-name "journal.org" org-directory))
+;; (setq +format-on-save-disabled-modes
+;;       '(emacs-lisp-mode  ; elisp's mechanisms are good enough
+;;         sql-mode         ; sqlformat is currently broken
+;;         tex-mode         ; latexindent is broken
+;;         latex-mode))
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'relative)
