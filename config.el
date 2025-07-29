@@ -25,8 +25,8 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one
-      doom-font "Fira Code-10")
+(setq doom-theme 'doom-outrun-electric
+      doom-font "Fira Code-11")
 (require 'org-indent)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -155,16 +155,20 @@
   (pcase appearance
     ('light (load-theme 'doom-solarized-light t))
     ('dark (load-theme 'doom-wilmersdorf t))))
-
+(defun gg/load-only-theme (theme)
+  "Disable all themes and then load a single theme interactively."
+  (while custom-enabled-themes
+    (disable-theme (car custom-enabled-themes)))
+  (load-theme theme t))
 (defun gg/pomodoro-theme ()
   (cl-case org-pomodoro-state
-    (:start (load-theme 'doom-one t))
-    (:pomodoro (load-theme 'doom-one t))
+    (:start (gg/load-only-theme 'doom-outrun-electric))
+    (:pomodoro (gg/load-only-theme 'doom-outrun-electric))
     ;; (:overtime nil)
-    (:killed (load-theme 'doom-solarized-light t))
-    (:none (load-theme 'doom-solarized-light t))
-    (:short-break (load-theme 'doom-solarized-dark t))
-    (:long-break (load-theme 'doom-solarized-dark t))
+    (:killed (gg/load-only-theme 'doom-solarized-light))
+    (:none (gg/load-only-theme 'doom-solarized-light))
+    (:short-break (gg/load-only-theme 'doom-solarized-dark))
+    (:long-break (gg/load-only-theme 'doom-solarized-dark))
     ;; (:tick nil)
     (t (error "Unknown org-pomodoro state: %S" org-pomodoro-state))))
 
@@ -205,17 +209,30 @@
 
 (map! :map doom-leader-notes-map
       :desc "Random non-diary"   "r A" #'gg/random-note)
-
-(use-package! websocket
-  :after org-roam)
-
-(use-package! org-roam-ui
-  :after org-roam
-  :config
-  (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow t
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start nil))
-(setq-hook! 'yaml-mode-hook +format-with :none)
+(setq-hook! 'yaml-mode-hook +format-with nil)
 (after! eshell
   (set-popup-rule! "*doom:eshell-popup:*" :width 80 :vslot -4 :select t :quit nil :ttl 0 :side 'right))
+(define-derived-mode helm-mode yaml-mode "helm"
+  "Major mode for editing kubernetes helm templates")
+(add-to-list 'magic-mode-alist '("{{" . helm-mode))
+(setq lsp-yaml-schemas '(
+                         (kubernetes . "/*")
+                         ("https://json.schemastore.org/kustomization.json" . "kustomization.yaml")))
+
+(setq lsp-yaml-schemas nil)
+(add-function :after after-focus-change-function
+              (lambda () (org-save-all-org-buffers)))
+(setq org-pomodoro-length 20
+      org-pomodoro-long-break-frequency 4)
+(sp-pair "{" "}")
+(sp-pair "{{" "}}")
+(after! projectile
+  (projectile-update-project-type
+   'maven
+   :marker-files "pom.xml"
+   :project-file "pom.xml"))
+;; (map!
+;;  :map sops-mode-map
+;;  :bind (("C-c C-c" . sops-save-file)
+;;         ("C-c C-k" . sops-cancel)
+;;         ("C-c C-d" . sops-edit-file)))

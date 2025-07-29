@@ -75,14 +75,28 @@
      (tramp-connection-local-default-system-profile (path-separator . ":")
       (null-device . "/dev/null"))))
  '(custom-safe-themes
-   '("88f7ee5594021c60a4a6a1c275614103de8c1435d6d08cc58882f920e0cec65e"
+   '("9d5124bef86c2348d7d4774ca384ae7b6027ff7f6eb3c401378e298ce605f83a"
+     "8c7e832be864674c220f9a9361c851917a93f921fedb7717b1b5ece47690c098"
+     "4b6cc3b60871e2f4f9a026a5c86df27905fb1b0e96277ff18a76a39ca53b82e1"
+     "0325a6b5eea7e5febae709dab35ec8648908af12cf2d2b569bedc8da0a3a81c1"
+     "5c7720c63b729140ed88cf35413f36c728ab7c70f8cd8422d9ee1cedeb618de5"
+     "88f7ee5594021c60a4a6a1c275614103de8c1435d6d08cc58882f920e0cec65e"
      "7964b513f8a2bb14803e717e0ac0123f100fb92160dcf4a467f530868ebaae3e"
      "afa47084cb0beb684281f480aa84dab7c9170b084423c7f87ba755b15f6776ef"
      "51c71bb27bdab69b505d9bf71c99864051b37ac3de531d91fdad1598ad247138"
      "02f57ef0a20b7f61adce51445b68b2a7e832648ce2e7efb19d217b6454c1b644" default))
+ '(ignored-local-variable-values
+   '((flycheck-checker . golangci-lint) (comment-fill-column . 80)))
  '(magit-todos-insert-after '(bottom) nil nil "Changed by setter of obsolete option `magit-todos-insert-at'")
  '(org-agenda-files
-   '("~/Documents/org-roam/todo.org"
+   '("~/Documents/org-roam/sites/app.asana.com/0/home/1209741931132787/1209850466363366.org"
+     "/Users/gregory.ganley/Documents/org-roam/daily/2025.org"
+     "/Users/gregory.ganley/org-roam/todo.org"
+     "/Users/gregory.ganley/Developer/devops/clusters/cluster-bootstrapper/todo.org"
+     "/Users/gregory.ganley/Developer/devops/devops-firewalk/todo.org"
+     "/Users/gregory.ganley/Documents/org-roam/capture/scs_migration.org"
+     "/Users/gregory.ganley/Documents/org-roam/daily/2024.org"
+     "/Users/gregory.ganley/Documents/org-roam/todo.org"
      "/Users/gregory.ganley/org-roam/daily/2023.org"
      "/Users/gregory.ganley/org-roam/capture/20210330153550-mysql_to_rds_transition.org"
      "/Users/gregory.ganley/org-roam/capture/20210330192155-alex.org"
@@ -465,10 +479,11 @@
      "/Users/gregory.ganley/org-roam/sites/zenlasopa142.weebly.com/expose-host-gpu-to-docker-container-on-mac.org"
      "/Users/gregory.ganley/org-roam/journal.org"
      "/Users/gregory.ganley/org-roam/notes.org"
-     "/Users/gregory.ganley/org-roam/projects.org"
-     "/Users/gregory.ganley/org-roam/todo.org"))
+     "/Users/gregory.ganley/org-roam/projects.org"))
  '(package-selected-packages
-   '(flycheck-elm mustache-mode elm-mode undo-fu-session emacsql-sqlite-builtin))
+   '(elm-mode emacsql-sqlite-builtin flycheck-elm kubernetes-evil mustache-mode
+     org-super-agenda sops undo-fu-session))
+ '(projectile-project-root-files-bottom-up '(".ccls-root" ".projectile" ".git"))
  '(safe-local-variable-values
    '((org-src-preserve-indentation) (eval require 'ox-texinfo+ nil t)
      (eval require 'ol-info)
@@ -483,5 +498,5 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(ts-fold-replacement-face ((t (:foreground unspecified :box nil :inherit font-lock-comment-face :weight light)))))
 (put 'customize-face 'disabled nil)
