@@ -26,7 +26,7 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-outrun-electric
-      doom-font "Fira Code-11")
+      doom-font "Fira Code-13")
 (require 'org-indent)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -236,3 +236,21 @@
 ;;  :bind (("C-c C-c" . sops-save-file)
 ;;         ("C-c C-k" . sops-cancel)
 ;;         ("C-c C-d" . sops-edit-file)))
+
+;; Claude Code IDE
+(use-package! claude-code-ide
+  :commands (claude-code-ide claude-code-ide-menu claude-code-ide-send-prompt)
+  :config
+  (setq claude-code-ide-terminal-backend 'vterm
+        claude-code-ide-window-side 'right
+        claude-code-ide-window-width 90
+        claude-code-ide-use-side-window t)
+  (claude-code-ide-emacs-tools-setup))
+
+(map! :leader
+      :prefix ("A" . "ai")
+      :desc "Claude menu" "a" #'claude-code-ide-menu
+      :desc "Claude start" "c" #'claude-code-ide
+      :desc "Claude prompt" "p" #'claude-code-ide-send-prompt
+      :desc "Claude continue" "C" #'claude-code-ide-continue
+      :desc "Claude toggle" "t" #'claude-code-ide-toggle-recent)

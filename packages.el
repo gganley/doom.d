@@ -57,3 +57,5 @@
 (package! org-super-agenda)
 (package! sops
   :recipe (:host github :repo "djgoku/sops"))
+(package! claude-code-ide
+  :recipe (:host github :repo "manzaltu/claude-code-ide.el"))

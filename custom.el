@@ -75,7 +75,12 @@
      (tramp-connection-local-default-system-profile (path-separator . ":")
       (null-device . "/dev/null"))))
  '(custom-safe-themes
-   '("9d5124bef86c2348d7d4774ca384ae7b6027ff7f6eb3c401378e298ce605f83a"
+   '("e1df746a4fa8ab920aafb96c39cd0ab0f1bac558eff34532f453bd32c687b9d6"
+     "21d2bf8d4d1df4859ff94422b5e41f6f2eeff14dd12f01428fa3cb4cb50ea0fb"
+     "5ec088e25ddfcfe37b6ae7712c9cb37fd283ea5df7ac609d007cafa27dab6c64"
+     "d43860349c9f7a5b96a090ecf5f698ff23a8eb49cd1e5c8a83bb2068f24ea563"
+     "0f220ea77c6355c411508e71225680ecb3e308b4858ef6c8326089d9ea94b86f"
+     "9d5124bef86c2348d7d4774ca384ae7b6027ff7f6eb3c401378e298ce605f83a"
      "8c7e832be864674c220f9a9361c851917a93f921fedb7717b1b5ece47690c098"
      "4b6cc3b60871e2f4f9a026a5c86df27905fb1b0e96277ff18a76a39ca53b82e1"
      "0325a6b5eea7e5febae709dab35ec8648908af12cf2d2b569bedc8da0a3a81c1"
@@ -481,8 +486,8 @@
      "/Users/gregory.ganley/org-roam/notes.org"
      "/Users/gregory.ganley/org-roam/projects.org"))
  '(package-selected-packages
-   '(elm-mode emacsql-sqlite-builtin flycheck-elm kubernetes-evil mustache-mode
-     org-super-agenda sops undo-fu-session))
+   '(adoc-mode elm-mode emacsql-sqlite-builtin flycheck-elm kubernetes-evil
+     magit-delta mustache-mode org-super-agenda ox-asciidoc sops undo-fu-session))
  '(projectile-project-root-files-bottom-up '(".ccls-root" ".projectile" ".git"))
  '(safe-local-variable-values
    '((org-src-preserve-indentation) (eval require 'ox-texinfo+ nil t)
