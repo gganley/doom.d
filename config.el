@@ -227,6 +227,7 @@
 (sp-pair "{" "}")
 (sp-pair "{{" "}}")
 (after! projectile
+  (setq projectile-enable-caching nil)
   (projectile-update-project-type
    'maven
    :marker-files "pom.xml"
