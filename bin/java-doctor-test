@@ -117,6 +117,36 @@ expect_no_line '^ERROR:.*sdkman' "sdkman drift never errors"
 expect_exit 0 "sdkman drift exit 0"
 sdkman=
 
+# --- check 3: toolingapi compatibility matrix --------------------------------
+# jdtls bundles Gradle 8.9 (max Java 22); import JVM pinned to 25 must error.
+plugins=$FIX/plugins-89
+mkdir -p $plugins
+touch $plugins/org.gradle.toolingapi_8.9.0.v20250531-0227-s.jar
+cfg=$FIX/import25-config.el
+cat > $cfg <<EOF
+(setq lsp-java-java-path "$jdk25/bin/java"
+      lsp-java-import-gradle-java-home "$jdk25")
+EOF
+run_doctor
+expect_line '^ERROR: jdtls embedded Gradle 8.9.0 supports at most Java 22 but the Gradle-import JVM is Java 25' "8.9 vs JDK25 errors"
+expect_exit 1 "8.9 vs JDK25 exit 1"
+
+# Same tooling API with import JVM 21 is compatible.
+cfg=$FIX/good-config.el
+run_doctor
+expect_line '^OK: jdtls embedded Gradle 8.9.0 (max Java 22) is compatible with import JVM (Java 21)' "8.9 vs JDK21 ok"
+expect_exit 0 "8.9 vs JDK21 exit 0"
+
+# Tooling API newer than the table is assumed OK.
+plugins=$FIX/plugins-99
+mkdir -p $plugins
+touch $plugins/org.gradle.toolingapi_9.9.0.v20270101-0000-s.jar
+cfg=$FIX/import25-config.el
+run_doctor
+expect_line '^OK: jdtls embedded Gradle Tooling API 9.9.0 is newer than the compat table' "newer-than-table assumed ok"
+expect_exit 0 "newer-than-table exit 0"
+plugins=
+
 # ---------------------------------------------------------------- summary --
 print
 if (( fails > 0 )); then

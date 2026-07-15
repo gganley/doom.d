@@ -107,9 +107,57 @@ check_sdkman_drift() {
   fi
 }
 
+# Max Java a Gradle version can RUN on (per Gradle's compatibility docs),
+# keyed as major*100+minor descending. Prints empty when the given version
+# is newer than the table — callers treat that as "assume OK".
+gradle_max_java() { # <gradle version, e.g. 8.9.0>
+  local major=${1%%.*} rest=${1#*.} minor key i
+  minor=${rest%%.*}
+  key=$(( major * 100 + minor ))
+  local -a table=( 901 25  814 24  810 23  808 22  805 21  803 20  706 19  705 18  703 17 )
+  if (( key > table[1] )); then
+    print -r -- ""
+    return
+  fi
+  for (( i = 1; i <= $#table; i += 2 )); do
+    if (( key >= table[i] )); then
+      print -r -- ${table[i+1]}
+      return
+    fi
+  done
+  print -r -- 16
+}
+
+# Check 3: when a Gradle import root has no wrapper, Buildship falls back to
+# the Gradle distribution matching jdtls's embedded Tooling API. That
+# distribution must be able to run on the pinned import JVM, or wrapper-less
+# imports die with "Unsupported class file major version" (2026-07-15 incident).
+check_toolingapi() {
+  if [[ ! -d $PLUGINS_DIR ]]; then
+    info "skipped toolingapi check: jdtls not installed at $PLUGINS_DIR"
+    return
+  fi
+  local jar gv max
+  jar=$(print -l -- $PLUGINS_DIR/org.gradle.toolingapi_*.jar(N) | head -1)
+  if [[ -z $jar ]]; then
+    info "skipped toolingapi check: no org.gradle.toolingapi jar in $PLUGINS_DIR"
+    return
+  fi
+  gv=$(basename "$jar" | sed 's/org\.gradle\.toolingapi_\([0-9.]*\)\.v.*/\1/')
+  max=$(gradle_max_java "$gv")
+  if [[ -z $max ]]; then
+    ok "jdtls embedded Gradle Tooling API $gv is newer than the compat table; assuming modern JDK support"
+  elif [[ -n $IMPORT_MAJOR ]] && (( IMPORT_MAJOR > max )); then
+    error "jdtls embedded Gradle $gv supports at most Java $max but the Gradle-import JVM is Java $IMPORT_MAJOR — wrapper-less imports will fail with 'Unsupported class file major version'; pin lsp-java-import-gradle-java-home to a JDK <= $max or update jdtls"
+  else
+    ok "jdtls embedded Gradle $gv (max Java $max) is compatible with import JVM (Java ${IMPORT_MAJOR:-unknown})"
+  fi
+}
+
 # -- run checks --------------------------------------------------------------
 check_pins
 check_sdkman_drift
+check_toolingapi
 
 (( errors > 0 )) && exit 1
 exit 0
