@@ -100,6 +100,23 @@ EOF
 run_doctor
 expect_line '^ERROR: lsp-java-java-path names JDK 21 but reports major 25' "major mismatch errors"
 
+# --- check 2: sdkman drift (informational) ----------------------------------
+sdkman=$FIX/sdkman
+mkdir -p $sdkman
+ln -s $FIX/jdks/25.0.2-fake $sdkman/current
+cfg=$FIX/good-config.el
+run_doctor
+expect_line '^INFO: sdkman current (.*) matches the lsp-java-java-path pin' "sdkman match is INFO"
+expect_exit 0 "sdkman match exit 0"
+
+rm $sdkman/current
+ln -s $FIX/jdks/21.0.9-fake $sdkman/current
+run_doctor
+expect_line '^INFO: sdkman current is .*21.0.9-fake; pins differ' "sdkman drift is INFO"
+expect_no_line '^ERROR:.*sdkman' "sdkman drift never errors"
+expect_exit 0 "sdkman drift exit 0"
+sdkman=
+
 # ---------------------------------------------------------------- summary --
 print
 if (( fails > 0 )); then

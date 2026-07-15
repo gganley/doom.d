@@ -90,8 +90,26 @@ check_pins() {
   fi
 }
 
+# Check 2: sdkman `current` symlink vs the pins — informational only,
+# because the pins are intentional; this just makes drift visible.
+check_sdkman_drift() {
+  local cur=$SDKMAN_JAVA_DIR/current target tb
+  if [[ ! -h $cur ]]; then
+    info "skipped sdkman drift check: no symlink at $cur"
+    return
+  fi
+  target=$(readlink "$cur")
+  tb=${target:t}
+  if [[ -n $PIN_JDTLS_JAVA && $PIN_JDTLS_JAVA == *"/$tb/"* ]]; then
+    info "sdkman current ($tb) matches the lsp-java-java-path pin"
+  else
+    info "sdkman current is $tb; pins differ (intentional — lsp-java-java-path: ${PIN_JDTLS_JAVA:-unset})"
+  fi
+}
+
 # -- run checks --------------------------------------------------------------
 check_pins
+check_sdkman_drift
 
 (( errors > 0 )) && exit 1
 exit 0
