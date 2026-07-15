@@ -1,0 +1,97 @@
+#!/bin/zsh
+# java-doctor — detect drift between the JDK pins in config.el, jdtls's
+# bundled Gradle Tooling API, and the JDKs installed on this machine, before
+# it surfaces as broken editor imports.
+# Spec: docs/superpowers/specs/2026-07-15-java-doctor-design.md
+#
+# Output contract: one finding per line, prefixed OK:/INFO:/WARN:/ERROR:.
+# Exit 0 when no errors; exit 1 when at least one ERROR. Warnings never fail.
+
+set -u
+
+CONFIG_EL=${JAVA_DOCTOR_CONFIG_EL:-$HOME/.config/doom/config.el}
+PLUGINS_DIR=${JAVA_DOCTOR_JDTLS_PLUGINS:-$HOME/.config/emacs/.local/etc/lsp/eclipse.jdt.ls/plugins}
+DAEMON_DIR=${JAVA_DOCTOR_GRADLE_DAEMON_DIR:-$HOME/.gradle/daemon}
+SDKMAN_JAVA_DIR=${JAVA_DOCTOR_SDKMAN_JAVA_DIR:-/opt/homebrew/opt/sdkman-cli/libexec/candidates/java}
+
+errors=0
+ok()    { print -r -- "OK: $1" }
+info()  { print -r -- "INFO: $1" }
+warn()  { print -r -- "WARN: $1" }
+error() { print -r -- "ERROR: $1"; errors=$(( errors + 1 )) }
+
+# Major version reported by a java binary (handles legacy "1.8.0" strings).
+java_major() {
+  local v major
+  v=$("$1" -version 2>&1 | head -1 | sed -n 's/.*version "\([0-9._]*\)".*/\1/p')
+  [[ -z $v ]] && return 1
+  major=${v%%.*}
+  if [[ $major == 1 ]]; then
+    v=${v#1.}
+    major=${v%%.*}
+  fi
+  print -r -- $major
+}
+
+# Major implied by a versioned path segment like .../25.0.2-tem/bin/java.
+path_major() {
+  print -r -- "$1" | grep -o '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*' | head -1 | cut -d. -f1
+}
+
+# Quoted string value of an elisp variable pin in config.el.
+config_pin() {
+  grep -o "$1 \"[^\"]*\"" "$CONFIG_EL" 2>/dev/null | head -1 | sed 's/[^"]*"\(.*\)"/\1/'
+}
+
+# Check 1: pinned JDK paths exist and report the major their name claims.
+# Sets PIN_JDTLS_JAVA / PIN_IMPORT_HOME / IMPORT_MAJOR for later checks.
+PIN_JDTLS_JAVA= PIN_IMPORT_HOME= IMPORT_MAJOR=
+check_pins() {
+  if [[ ! -r $CONFIG_EL ]]; then
+    warn "config.el not readable at $CONFIG_EL; skipping pin checks"
+    return
+  fi
+  PIN_JDTLS_JAVA=$(config_pin lsp-java-java-path)
+  PIN_IMPORT_HOME=$(config_pin lsp-java-import-gradle-java-home)
+
+  if [[ -z $PIN_JDTLS_JAVA ]]; then
+    warn "lsp-java-java-path is not pinned in $CONFIG_EL"
+  elif [[ ! -x $PIN_JDTLS_JAVA ]]; then
+    error "pinned lsp-java-java-path does not exist: $PIN_JDTLS_JAVA"
+  else
+    local want got
+    want=$(path_major "$PIN_JDTLS_JAVA")
+    got=$(java_major "$PIN_JDTLS_JAVA") || got=
+    if [[ -z $got ]]; then
+      warn "could not run pinned lsp-java-java-path: $PIN_JDTLS_JAVA"
+    elif [[ -n $want && $want != $got ]]; then
+      error "lsp-java-java-path names JDK $want but reports major $got: $PIN_JDTLS_JAVA"
+    else
+      ok "lsp-java-java-path is JDK $got ($PIN_JDTLS_JAVA)"
+    fi
+  fi
+
+  if [[ -z $PIN_IMPORT_HOME ]]; then
+    warn "lsp-java-import-gradle-java-home is not pinned in $CONFIG_EL"
+  elif [[ ! -x $PIN_IMPORT_HOME/bin/java ]]; then
+    error "pinned lsp-java-import-gradle-java-home has no bin/java: $PIN_IMPORT_HOME"
+  else
+    local want got
+    want=$(path_major "$PIN_IMPORT_HOME")
+    got=$(java_major "$PIN_IMPORT_HOME/bin/java") || got=
+    if [[ -z $got ]]; then
+      warn "could not run pinned import JVM: $PIN_IMPORT_HOME/bin/java"
+    elif [[ -n $want && $want != $got ]]; then
+      error "lsp-java-import-gradle-java-home names JDK $want but reports major $got: $PIN_IMPORT_HOME"
+    else
+      IMPORT_MAJOR=$got
+      ok "Gradle-import JVM is JDK $got ($PIN_IMPORT_HOME)"
+    fi
+  fi
+}
+
+# -- run checks --------------------------------------------------------------
+check_pins
+
+(( errors > 0 )) && exit 1
+exit 0

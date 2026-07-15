@@ -1,0 +1,109 @@
+#!/bin/zsh
+# Regression tests for bin/java-doctor. Builds throwaway fixtures and runs
+# the doctor against them via its JAVA_DOCTOR_* env overrides.
+set -u
+
+DOCTOR=${0:a:h}/java-doctor
+FIX=$(mktemp -d)
+trap 'rm -rf "$FIX"' EXIT
+fails=0 out= _status=0
+cfg= plugins= daemon= sdkman=
+
+# Fake JDK: a version-named dir whose java shim prints a matching banner.
+make_jdk() { # <version, e.g. 25.0.2> -> prints the JDK home path
+  local dir=$FIX/jdks/$1-fake
+  mkdir -p $dir/bin
+  cat > $dir/bin/java <<EOF
+#!/bin/sh
+echo 'openjdk version "$1" 2026-01-01' >&2
+EOF
+  chmod +x $dir/bin/java
+  print -r -- $dir
+}
+
+run_doctor() { # optional extra KEY=VAL env pairs as args
+  out=$(env \
+    JAVA_DOCTOR_CONFIG_EL=${cfg:-$FIX/absent-config.el} \
+    JAVA_DOCTOR_JDTLS_PLUGINS=${plugins:-$FIX/absent-plugins} \
+    JAVA_DOCTOR_GRADLE_DAEMON_DIR=${daemon:-$FIX/absent-daemon} \
+    JAVA_DOCTOR_SDKMAN_JAVA_DIR=${sdkman:-$FIX/absent-sdkman} \
+    JAVA_DOCTOR_SKIP_NETWORK=1 \
+    "$@" "$DOCTOR" 2>&1)
+  _status=$?
+}
+
+expect_line() { # <grep pattern> <description>
+  if print -r -- "$out" | grep -q -- "$1"; then
+    print "PASS: $2"
+  else
+    print "FAIL: $2 — no line matching: $1"
+    print -r -- "$out" | sed 's/^/    | /'
+    fails=$(( fails + 1 ))
+  fi
+}
+
+expect_no_line() { # <grep pattern> <description>
+  if print -r -- "$out" | grep -q -- "$1"; then
+    print "FAIL: $2 — unexpected line matching: $1"
+    print -r -- "$out" | sed 's/^/    | /'
+    fails=$(( fails + 1 ))
+  else
+    print "PASS: $2"
+  fi
+}
+
+expect_exit() { # <code> <description>
+  if [[ $_status -eq $1 ]]; then
+    print "PASS: $2"
+  else
+    print "FAIL: $2 — exit $_status, wanted $1"
+    fails=$(( fails + 1 ))
+  fi
+}
+
+# --- check 1: pin integrity -------------------------------------------------
+jdk25=$(make_jdk 25.0.2)
+jdk21=$(make_jdk 21.0.9)
+
+# Happy path: both pins exist and majors match their path names.
+cfg=$FIX/good-config.el
+cat > $cfg <<EOF
+(after! lsp-java
+  (setq lsp-java-java-path "$jdk25/bin/java"
+        lsp-java-import-gradle-java-home "$jdk21"
+        lsp-java-compile-null-analysis-mode "automatic"))
+EOF
+run_doctor
+expect_line '^OK: lsp-java-java-path is JDK 25' "happy pins: jdtls JVM ok"
+expect_line '^OK: Gradle-import JVM is JDK 21' "happy pins: import JVM ok"
+expect_exit 0 "happy pins exit 0"
+
+# Missing pin paths must error.
+cfg=$FIX/bad-config.el
+cat > $cfg <<'EOF'
+(after! lsp-java
+  (setq lsp-java-java-path "/nonexistent/jdk/bin/java"
+        lsp-java-import-gradle-java-home "/nonexistent/jdk-home"))
+EOF
+run_doctor
+expect_line '^ERROR: pinned lsp-java-java-path does not exist' "missing jdtls JVM pin errors"
+expect_line '^ERROR: pinned lsp-java-import-gradle-java-home has no bin/java' "missing import home errors"
+expect_exit 1 "missing pins exit 1"
+
+# Path names JDK 21 but the binary reports 25: drifted pin must error.
+mkdir -p $FIX/jdks/21.0.9-lies/bin
+cp $jdk25/bin/java $FIX/jdks/21.0.9-lies/bin/java
+cfg=$FIX/mismatch-config.el
+cat > $cfg <<EOF
+(setq lsp-java-java-path "$FIX/jdks/21.0.9-lies/bin/java")
+EOF
+run_doctor
+expect_line '^ERROR: lsp-java-java-path names JDK 21 but reports major 25' "major mismatch errors"
+
+# ---------------------------------------------------------------- summary --
+print
+if (( fails > 0 )); then
+  print "$fails test(s) failed"
+  exit 1
+fi
+print "all tests passed"
