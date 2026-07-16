@@ -172,11 +172,56 @@ check_daemon_logs() {
   done
 }
 
+# Check 5: age of the installed jdtls vs the latest published build. Covers
+# the root fragility — an aging jdtls means an aging embedded Tooling API.
+check_freshness() {
+  if [[ ! -d $PLUGINS_DIR ]]; then
+    info "skipped freshness check: jdtls not installed at $PLUGINS_DIR"
+    return
+  fi
+  local installed latest remote i_s l_s days
+  installed=$(ls "$PLUGINS_DIR" | grep -o 'v20[0-9]\{6\}' | sort | tail -1 | tr -d v)
+  if [[ -z $installed ]]; then
+    info "skipped freshness check: no build stamps in plugin filenames"
+    return
+  fi
+  latest=${JAVA_DOCTOR_LATEST_DATE:-}
+  if [[ -z $latest ]]; then
+    if [[ ${JAVA_DOCTOR_SKIP_NETWORK:-0} == 1 ]]; then
+      info "skipped freshness network check (JAVA_DOCTOR_SKIP_NETWORK=1)"
+      return
+    fi
+    remote=$(curl -fsS --max-time 3 https://download.eclipse.org/jdtls/snapshots/latest.txt 2>/dev/null)
+    if [[ -z $remote ]]; then
+      info "skipped freshness check: could not reach download.eclipse.org"
+      return
+    fi
+    latest=$(print -r -- "$remote" | grep -o '20[0-9]\{10\}' | head -1 | cut -c1-8)
+    if [[ -z $latest ]]; then
+      info "skipped freshness check: could not parse latest.txt ($remote)"
+      return
+    fi
+  fi
+  i_s=$(date -j -f %Y%m%d "$installed" +%s 2>/dev/null)
+  l_s=$(date -j -f %Y%m%d "$latest" +%s 2>/dev/null)
+  if [[ -z $i_s || -z $l_s ]]; then
+    warn "freshness check could not parse dates (installed=$installed latest=$latest)"
+    return
+  fi
+  days=$(( (l_s - i_s) / 86400 ))
+  if (( days > 90 )); then
+    warn "installed jdtls build $installed is $days days behind latest ($latest) — bump it: set lsp-java-jdt-download-url to the newest release tarball, rm -rf ~/.config/emacs/.local/etc/lsp/eclipse.jdt.ls, restart Emacs, then M-x lsp-install-server RET jdtls RET"
+  else
+    ok "jdtls build $installed is $days days behind latest ($latest)"
+  fi
+}
+
 # -- run checks --------------------------------------------------------------
 check_pins
 check_sdkman_drift
 check_toolingapi
 check_daemon_logs
+check_freshness
 
 (( errors > 0 )) && exit 1
 exit 0

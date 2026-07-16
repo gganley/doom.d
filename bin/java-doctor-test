@@ -164,6 +164,23 @@ expect_line "^OK: no 'Unsupported class file major version' in Gradle daemon log
 expect_exit 0 "clean daemon logs exit 0"
 daemon=
 
+# --- check 5: jdtls freshness -------------------------------------------------
+# Installed build stamp comes from plugin filenames (v20250531 fixture).
+plugins=$FIX/plugins-89
+cfg=$FIX/good-config.el
+run_doctor JAVA_DOCTOR_LATEST_DATE=20260701
+expect_line '^WARN: installed jdtls build 20250531 is [0-9]* days behind latest (20260701)' "stale jdtls warns"
+expect_exit 0 "stale jdtls still exit 0 (warning only)"
+
+run_doctor JAVA_DOCTOR_LATEST_DATE=20250610
+expect_line '^OK: jdtls build 20250531 is [0-9]* days behind latest (20250610)' "fresh jdtls ok"
+expect_exit 0 "fresh jdtls exit 0"
+
+# Without a latest date and with network skipped, the check skips as INFO.
+run_doctor
+expect_line '^INFO: skipped freshness network check' "offline freshness skips"
+plugins=
+
 # ---------------------------------------------------------------- summary --
 print
 if (( fails > 0 )); then
