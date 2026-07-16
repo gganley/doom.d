@@ -137,12 +137,21 @@ check_toolingapi() {
     return
   fi
   local jar gv max
-  jar=$(print -l -- $PLUGINS_DIR/org.gradle.toolingapi_*.jar(N) | head -1)
-  if [[ -z $jar ]]; then
+  local -a jars
+  jars=( $PLUGINS_DIR/org.gradle.toolingapi_*.jar(N) )
+  if (( $#jars == 0 )); then
     info "skipped toolingapi check: no org.gradle.toolingapi jar in $PLUGINS_DIR"
     return
   fi
+  jar=${jars[1]}
+  if (( $#jars > 1 )); then
+    warn "multiple org.gradle.toolingapi jars in $PLUGINS_DIR; checking ${jar:t}"
+  fi
   gv=$(basename "$jar" | sed 's/org\.gradle\.toolingapi_\([0-9.]*\)\.v.*/\1/')
+  if [[ ! $gv =~ ^[0-9][0-9.]*$ ]]; then
+    warn "could not parse toolingapi jar version: ${jar:t}"
+    return
+  fi
   max=$(gradle_max_java "$gv")
   if [[ -z $max ]]; then
     ok "jdtls embedded Gradle Tooling API $gv is newer than the compat table; assuming modern JDK support"
@@ -195,6 +204,8 @@ check_freshness() {
       info "skipped freshness check: could not reach download.eclipse.org"
       return
     fi
+    # latest.txt names a tarball like jdt-language-server-1.61.0-YYYYMMDDHHMM.tar.gz;
+    # a format change upstream degrades to the INFO skip below.
     latest=$(print -r -- "$remote" | grep -o '20[0-9]\{10\}' | head -1 | cut -c1-8)
     if [[ -z $latest ]]; then
       info "skipped freshness check: could not parse latest.txt ($remote)"
@@ -210,6 +221,8 @@ check_freshness() {
   days=$(( (l_s - i_s) / 86400 ))
   if (( days > 90 )); then
     warn "installed jdtls build $installed is $days days behind latest ($latest) — bump it: set lsp-java-jdt-download-url to the newest release tarball, rm -rf ~/.config/emacs/.local/etc/lsp/eclipse.jdt.ls, restart Emacs, then M-x lsp-install-server RET jdtls RET"
+  elif (( days < 0 )); then
+    ok "jdtls build $installed is ahead of published latest ($latest)"
   else
     ok "jdtls build $installed is $days days behind latest ($latest)"
   fi
