@@ -51,6 +51,7 @@ check_pins() {
     warn "config.el not readable at $CONFIG_EL; skipping pin checks"
     return
   fi
+  local want got
   PIN_JDTLS_JAVA=$(config_pin lsp-java-java-path)
   PIN_IMPORT_HOME=$(config_pin lsp-java-import-gradle-java-home)
 
@@ -59,7 +60,6 @@ check_pins() {
   elif [[ ! -x $PIN_JDTLS_JAVA ]]; then
     error "pinned lsp-java-java-path does not exist: $PIN_JDTLS_JAVA"
   else
-    local want got
     want=$(path_major "$PIN_JDTLS_JAVA")
     got=$(java_major "$PIN_JDTLS_JAVA") || got=
     if [[ -z $got ]]; then
@@ -76,7 +76,6 @@ check_pins() {
   elif [[ ! -x $PIN_IMPORT_HOME/bin/java ]]; then
     error "pinned lsp-java-import-gradle-java-home has no bin/java: $PIN_IMPORT_HOME"
   else
-    local want got
     want=$(path_major "$PIN_IMPORT_HOME")
     got=$(java_major "$PIN_IMPORT_HOME/bin/java") || got=
     if [[ -z $got ]]; then

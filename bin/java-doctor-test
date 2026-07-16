@@ -181,6 +181,18 @@ run_doctor
 expect_line '^INFO: skipped freshness network check' "offline freshness skips"
 plugins=
 
+# --- output contract: every line must carry a prefix -------------------------
+# (catches zsh local-redeclaration leaks, which print bare name=value lines)
+cfg=$FIX/good-config.el
+run_doctor
+if print -r -- "$out" | grep -qv '^\(OK\|INFO\|WARN\|ERROR\): '; then
+  print "FAIL: output contract — unprefixed line(s):"
+  print -r -- "$out" | grep -v '^\(OK\|INFO\|WARN\|ERROR\): ' | sed 's/^/    | /'
+  fails=$(( fails + 1 ))
+else
+  print "PASS: all output lines carry contract prefixes"
+fi
+
 # ---------------------------------------------------------------- summary --
 print
 if (( fails > 0 )); then
