@@ -154,10 +154,29 @@ check_toolingapi() {
   fi
 }
 
+# Check 4: scan recent Gradle daemon logs for the classfile-version canary —
+# the direct symptom of a too-new JVM running a too-old Gradle.
+check_daemon_logs() {
+  if [[ ! -d $DAEMON_DIR ]]; then
+    info "skipped daemon-log check: no $DAEMON_DIR"
+    return
+  fi
+  local hits f
+  hits=$(find "$DAEMON_DIR" -name '*.log' -mtime -7 -exec grep -l 'Unsupported class file major version' {} + 2>/dev/null)
+  if [[ -z $hits ]]; then
+    ok "no 'Unsupported class file major version' in Gradle daemon logs from the last 7 days"
+    return
+  fi
+  for f in ${(f)hits}; do
+    error "recent Gradle daemon log shows a JDK/Gradle incompatibility: $f"
+  done
+}
+
 # -- run checks --------------------------------------------------------------
 check_pins
 check_sdkman_drift
 check_toolingapi
+check_daemon_logs
 
 (( errors > 0 )) && exit 1
 exit 0

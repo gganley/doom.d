@@ -147,6 +147,23 @@ expect_line '^OK: jdtls embedded Gradle Tooling API 9.9.0 is newer than the comp
 expect_exit 0 "newer-than-table exit 0"
 plugins=
 
+# --- check 4: daemon-log canary ----------------------------------------------
+daemon=$FIX/daemon
+mkdir -p $daemon/8.9
+cat > $daemon/8.9/daemon-1.out.log <<'EOF'
+BUG! exception in phase 'semantic analysis' in source unit '_BuildScript_' Unsupported class file major version 70
+EOF
+cfg=$FIX/good-config.el
+run_doctor
+expect_line '^ERROR: recent Gradle daemon log shows a JDK/Gradle incompatibility: .*daemon-1.out.log' "canary in daemon log errors"
+expect_exit 1 "daemon canary exit 1"
+
+rm $daemon/8.9/daemon-1.out.log
+run_doctor
+expect_line "^OK: no 'Unsupported class file major version' in Gradle daemon logs" "clean daemon logs ok"
+expect_exit 0 "clean daemon logs exit 0"
+daemon=
+
 # ---------------------------------------------------------------- summary --
 print
 if (( fails > 0 )); then
