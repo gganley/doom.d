@@ -228,30 +228,181 @@
 (sp-pair "{{" "}}")
 (after! projectile
   (setq projectile-enable-caching nil)
+  ;; jdtls/lsp-java writes an Eclipse `.project` file into every Maven module it
+  ;; imports (core/, core/core-web/, platform/, ...). Doom registers `.project`
+  ;; as a bottom-up project-root marker, so `projectile-root-bottom-up' returns
+  ;; the deepest module dir instead of the enclosing `.git' repo — the project
+  ;; root jumps to whatever submodule you're editing. Drop `.project` so only
+  ;; real VCS roots (and `.projectile') count, giving a holistic repo-wide view.
+  (setq projectile-project-root-files-bottom-up
+        (remove ".project" projectile-project-root-files-bottom-up))
   (projectile-update-project-type
    'maven
    :marker-files "pom.xml"
-   :project-file "pom.xml"))
+   :project-file "pom.xml")
+
+  (defun gg/ssh-config-host-aliases ()
+    "Return concrete host aliases from ~/.ssh/config."
+    (let ((ssh-config (expand-file-name "~/.ssh/config"))
+          hosts)
+      (when (file-readable-p ssh-config)
+        (with-temp-buffer
+          (insert-file-contents ssh-config)
+          (goto-char (point-min))
+          (while (re-search-forward
+                  "^[[:blank:]]*[Hh][Oo][Ss][Tt][[:blank:]]+\\(.+\\)$"
+                  nil t)
+            (dolist (host (split-string (match-string-no-properties 1) "[[:blank:]]+" t))
+              (unless (string-match-p "[*?!]" host)
+                (push host hosts))))))
+      (delete-dups (nreverse hosts))))
+
+  (defun gg/tramp-project-path (host dir &optional sudo)
+    "Build a TRAMP project path for HOST and DIR.
+When SUDO is non-nil, use ssh|sudo multi-hop."
+    (let* ((remote-dir (if (string-prefix-p "/" dir) dir (concat "/" dir)))
+           (clean-dir (directory-file-name remote-dir)))
+      (if sudo
+          (format "/ssh:%s|sudo:%s:%s/" host host clean-dir)
+        (format "/ssh:%s:%s/" host clean-dir))))
+
+  (defun gg/projectile-add-remote-project (host dir &optional no-sudo)
+    "Add HOST:DIR to Projectile and switch to it.
+Default behavior uses sudo multi-hop. Use prefix argument NO-SUDO to skip sudo."
+    (interactive
+     (let* ((hosts (gg/ssh-config-host-aliases))
+            (host (completing-read
+                   "SSH host alias: "
+                   hosts nil nil nil nil (car hosts)))
+            (dir (read-string "Remote directory: " "/")))
+       (list host dir current-prefix-arg)))
+    (let ((project (gg/tramp-project-path host dir (not no-sudo))))
+      (projectile-add-known-project project)
+      (projectile-save-known-projects)
+      (projectile-switch-project-by-name project)))
+
+  (defun gg/projectile-switch-project-magit ()
+    "Switch to a project and open its Magit status buffer.
+Useful when opening a project just to pull/review changes rather
+than to visit a particular file."
+    (interactive)
+    ;; Override the post-switch function (find-file prompt by default) rather
+    ;; than `projectile-switch-project-action', which Doom's :ui workspaces
+    ;; module owns — replacing the action skips workspace creation, so the
+    ;; project wouldn't show up in `SPC TAB'.
+    (let ((+workspaces-switch-project-function #'magit-status))
+      (call-interactively #'projectile-switch-project)))
+
+  (map! :leader
+        :desc "Add/switch remote project"
+        "p R" #'gg/projectile-add-remote-project
+        :desc "Switch project to magit"
+        "p m" #'gg/projectile-switch-project-magit))
+
+;;; Git worktrees
+;;
+;; Claude Code sessions work in git worktrees so concurrent threads cannot
+;; collide on a branch — git refuses to check the same branch out twice. Its
+;; EnterWorktree places them at `<repo>/.claude/worktrees/<name>' and there is no
+;; setting for the location, so the config below meets it there rather than
+;; fighting it. See ~/Developer/agent-memory/docs/specs/ for the design.
+
+(after! magit
+
+  ;; `magit-insert-worktrees' ships with magit but is NOT in the default
+  ;; `magit-status-sections-hook', so worktrees are invisible in magit-status.
+  ;; This is load-bearing rather than cosmetic: visiting a worktree is what
+  ;; registers it with Projectile, so without the section there is no cheap way
+  ;; in. Positioned right after the status headers, i.e. top of the buffer.
+  (magit-add-section-hook 'magit-status-sections-hook
+                          #'magit-insert-worktrees
+                          #'magit-insert-status-headers
+                          'append)
+
+  ;; magit's shipped default is `magit-read-worktree-directory-sibling', which
+  ;; would scatter hand-made worktrees beside the repo while agent-made ones live
+  ;; inside it. Point `%' at the same directory EnterWorktree uses.
+  (defun gg/magit-read-worktree-directory-claude (prompt branch)
+    "Read a new worktree directory under the main checkout's `.claude/worktrees/'.
+Suitable as `magit-read-worktree-directory-function'.  PROMPT is passed
+through to `read-directory-name'.  BRANCH seeds the initial input, with
+slashes replaced by dashes, matching magit's own convention.
+
+Rooted at the *main* checkout rather than at `magit-toplevel', so creating
+a worktree while already inside one does not nest them.  Uses
+--git-common-dir, the same signal that distinguishes a linked worktree
+from the main checkout."
+    (let* ((common (magit-git-string "rev-parse" "--path-format=absolute"
+                                     "--git-common-dir"))
+           (main   (file-name-directory (directory-file-name common)))
+           (base   (expand-file-name ".claude/worktrees/" main)))
+      (make-directory base t)
+      (read-directory-name prompt base nil nil
+                           (and branch (string-replace "/" "-" branch)))))
+
+  (setq magit-read-worktree-directory-function
+        #'gg/magit-read-worktree-directory-claude))
+
+(after! projectile
+  (defun gg/projectile-switch-worktree ()
+    "Switch to another worktree of the current repository.
+Lists the repo's other worktrees, adds the chosen one to Projectile's
+known projects, then switches to it in its own workspace with Magit
+status open.  Works in both directions: from the main checkout out to a
+worktree, and from a worktree back to the main checkout."
+    (interactive)
+    (let* ((here (magit-toplevel))
+           (others (cl-remove here (magit-list-worktrees)
+                              :test #'file-equal-p :key #'car))
+           (candidates
+            (mapcar (lambda (wt)
+                      (let* ((path   (nth 0 wt))
+                             (commit (nth 1 wt))
+                             (branch (nth 2 wt))
+                             (rel    (file-relative-name path here)))
+                        (cons (format "%-30s %s"
+                                      (or branch
+                                          (if commit
+                                              (concat "detached " (substring commit 0 7))
+                                            "detached"))
+                                      ;; A relative path is the useful label going
+                                      ;; *into* a nested worktree, but coming back
+                                      ;; out it degenerates to "../../../" — show
+                                      ;; the abbreviated absolute path instead.
+                                      (if (string-prefix-p ".." rel)
+                                          (abbreviate-file-name path)
+                                        rel))
+                              path)))
+                    others)))
+      (unless candidates
+        (user-error "No other worktrees in %s" (abbreviate-file-name here)))
+      (let* ((choice (completing-read "Switch to worktree: " candidates nil t))
+             (path (cdr (assoc choice candidates))))
+        (projectile-add-known-project path)
+        (projectile-save-known-projects)
+        ;; Override the post-switch function, NOT
+        ;; `projectile-switch-project-action' — in Doom that action *is*
+        ;; `+workspaces-switch-to-project-h', the workspace creator, so
+        ;; replacing it would skip `SPC TAB' registration entirely.
+        (let ((+workspaces-switch-project-function #'magit-status))
+          (projectile-switch-project-by-name path)))))
+
+  (map! :leader
+        :desc "Switch worktree"
+        "p w" #'gg/projectile-switch-worktree))
 ;; (map!
 ;;  :map sops-mode-map
 ;;  :bind (("C-c C-c" . sops-save-file)
 ;;         ("C-c C-k" . sops-cancel)
 ;;         ("C-c C-d" . sops-edit-file)))
 
-;; Claude Code IDE
-(use-package! claude-code-ide
-  :commands (claude-code-ide claude-code-ide-menu claude-code-ide-send-prompt)
+;; Org-drill — spaced repetition flashcards
+(use-package! org-drill
+  :after org
   :config
-  (setq claude-code-ide-terminal-backend 'vterm
-        claude-code-ide-window-side 'right
-        claude-code-ide-window-width 90
-        claude-code-ide-use-side-window t)
-  (claude-code-ide-emacs-tools-setup))
+  (setq org-drill-scope 'directory       ; drill all files in the same directory
+        org-drill-add-random-noise-to-intervals-p t
+        org-drill-learn-fraction 0.3))    ; show 30% new cards per session
 
 (map! :leader
-      :prefix ("A" . "ai")
-      :desc "Claude menu" "a" #'claude-code-ide-menu
-      :desc "Claude start" "c" #'claude-code-ide
-      :desc "Claude prompt" "p" #'claude-code-ide-send-prompt
-      :desc "Claude continue" "C" #'claude-code-ide-continue
-      :desc "Claude toggle" "t" #'claude-code-ide-toggle-recent)
+      :desc "Drill session" "n D" #'org-drill)

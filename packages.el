@@ -48,14 +48,18 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-
-(package! ob-ledger
-  :recipe (:host github :repo "overtone/emacs-live"
-           :files ("packs/stable/org-pack/lib/org-mode/lisp/ob-ledger.el")))
-(package! org-ql)
 (package! mermaid-mode)
-(package! org-super-agenda)
 (package! sops
   :recipe (:host github :repo "djgoku/sops"))
 (package! claude-code-ide
   :recipe (:host github :repo "manzaltu/claude-code-ide.el"))
+(package! eat)
+(package! org-drill)
+
+;; org interface (spec: agent-memory docs/specs/2026-08-02-org-interface-design.md)
+(unpin! org)                 ; L10: orgit-forge needs org >= 9.8 (live was 9.7.11)
+(package! org-ql)
+(package! org-super-agenda)
+(package! forge)             ; MR states + review requests; issues NOT used (L15)
+(package! orgit)
+(package! orgit-forge)
