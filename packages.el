@@ -63,3 +63,6 @@
 (package! forge)             ; MR states + review requests; issues NOT used (L15)
 (package! orgit)
 (package! orgit-forge)
+(package! ghostel)
+(package! claude-code-ide
+  :recipe (:host github :repo "manzaltu/claude-code-ide.el"))

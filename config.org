@@ -1,13 +1,27 @@
-;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+#+title: Config
 
+* Main
+
+** Header
+#+begin_src emacs-lisp
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+#+end_src
+
+** Contact Info
+#+begin_src emacs-lisp
 (setq user-full-name "Gregory Ganley"
       user-mail-address "gregory.ganley@savant.com")
+#+end_src
 
+** mac
+#+begin_src emacs-lisp
 (setq mac-command-modifier 'super
       mac-option-modifier 'meta
       mac-right-command-modifier 'super
       mac-right-option-modifier 'meta)
-
+#+end_src
+** Doom
+#+begin_src emacs-lisp
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
 ;;
@@ -28,7 +42,9 @@
       doom-font "Fira Code-13"
       doom-leader-alt-key "C-M-SPC"
       doom-localleader-alt-key "M-SPC")
-
+#+end_src
+** Display
+#+begin_src emacs-lisp
 (setq display-line-numbers-type 'relative
       doom-modeline-buffer-file-name-style 'relative-to-project)
 (setq frame-title-format
@@ -41,7 +57,9 @@
 
 (add-to-list 'default-frame-alist '(height . 48))
 (add-to-list 'default-frame-alist '(width . 160))
-
+#+end_src
+** Projectile
+#+begin_src emacs-lisp
 (use-package! projectile
   :config
   (setq projectile-project-root-files-bottom-up (remove ".project" projectile-project-root-files-bottom-up))
@@ -66,7 +84,9 @@ than to visit a particular file."
   (map! :leader
         :desc "Switch project to magit"
         "p m" #'gg/projectile-switch-project-magit))
-
+#+end_src
+* Org
+#+begin_src emacs-lisp
 (require 'org-indent)
 (defun gg/hostname-split (str)
   (interactive)
@@ -118,7 +138,9 @@ than to visit a particular file."
       org-agenda-todo-ignore-scheduled 'future
       org-agenda-tags-todo-honor-ignore-options t)
   )
-
+#+end_src
+** Roam
+#+begin_src emacs-lisp
 (use-package! org-roam
   :custom
   (org-roam-directory org-directory)
@@ -127,21 +149,29 @@ than to visit a particular file."
            "%?"
            :target (file+head "capture/${slug}.org" "#+title: ${title}\n")
            :unnarrowed t))))
-
+#+end_src
+* Magit
+#+begin_src emacs-lisp
 (use-package! magit
   :config
   (magit-add-section-hook 'magit-status-sections-hook
                           #'magit-insert-worktrees
                           #'magit-insert-status-headers
                           'append))
-
+#+end_src
+* Claude
+#+begin_src emacs-lisp
 (use-package! claude-code-ide
   :bind ("C-c '" . claude-code-ide-menu) ; Set your favorite keybinding
   :custom (claude-code-ide-terminal-backend 'ghostel)
   :config
   (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
-
+#+end_src
+* Lang
+** Yaml
+#+begin_src emacs-lisp
 (use-package yaml
   :config
   (define-derived-mode helm-mode yaml-mode "helm"
     "Major mode for editing kubernetes helm templates"))
+#+end_src

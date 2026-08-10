@@ -96,7 +96,7 @@
    '((flycheck-checker . golangci-lint) (comment-fill-column . 80)))
  '(magit-todos-insert-after '(bottom) nil nil "Changed by setter of obsolete option `magit-todos-insert-at'")
  '(package-selected-packages
-   '(adoc-mode elm-mode emacsql-sqlite-builtin flycheck-elm kubernetes-evil
+   '(adoc-mode elm-mode emacsql-sqlite-builtin flycheck-elm ghostel kubernetes-evil
      magit-delta mustache-mode org-super-agenda ox-asciidoc sops undo-fu-session))
  '(projectile-project-root-files-bottom-up '(".ccls-root" ".projectile" ".git"))
  '(safe-local-variable-values
